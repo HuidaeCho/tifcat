@@ -1,7 +1,7 @@
 #define _MAIN_C_
 
 #include <gdal.h>
-#include "global.h"
+#include "raster.h"
 
 #define GET_ARG (++i < argc ? argv[i] : NULL)
 

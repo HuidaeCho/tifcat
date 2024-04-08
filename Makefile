@@ -9,4 +9,4 @@ clean:
 tifcat: main.o raster.o
 	$(CC) $(LDFLAGS) -o $@ $^ `gdal-config --libs`
 
-*.o: global.h
+*.o: raster.h

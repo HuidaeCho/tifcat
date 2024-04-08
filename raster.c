@@ -1,6 +1,6 @@
 #include <gdal.h>
 #include <cpl_string.h>
-#include "global.h"
+#include "raster.h"
 
 void print_raster(const char *path, const char *fmt, const char *null_str)
 {
