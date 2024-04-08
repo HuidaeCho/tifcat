@@ -1,6 +1,6 @@
 # TifCat
 
-This program prints out cell values of a GeoTIFF file. I wrote this utility for unit testing. It requires GDAL.
+This program prints out the cell values of a GeoTIFF file. It is meant to be used for unit testing with small files and requires GDAL.
 
 ```bash
 $ ./tifcat test/fdr.tif 

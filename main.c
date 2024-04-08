@@ -3,7 +3,7 @@
 #include <gdal.h>
 #include "raster.h"
 
-#define GET_ARG (++i < argc ? argv[i] : NULL)
+#define ARG (++i < argc ? argv[i] : NULL)
 
 int main(int argc, char *argv[])
 {
@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    path = GET_ARG;
-    null_str = GET_ARG;
-    fmt = GET_ARG;
+    path = ARG;
+    null_str = ARG;
+    fmt = ARG;
 
     GDALAllRegister();
     print_raster(path, null_str, fmt);
