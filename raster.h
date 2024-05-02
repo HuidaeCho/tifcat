@@ -1,5 +1,5 @@
-#ifndef _GLOBAL_H_
-#define _GLOBAL_H_
+#ifndef _RASTER_H_
+#define _RASTER_H_
 
 #define RASTER_MAP_TYPE_AUTO 0
 #define RASTER_MAP_TYPE_BYTE 1
