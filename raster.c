@@ -1,3 +1,4 @@
+#include <math.h>
 #include <gdal.h>
 #include <cpl_string.h>
 #include <omp.h>
