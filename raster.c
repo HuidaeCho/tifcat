@@ -1,5 +1,6 @@
 #include <gdal.h>
 #include <cpl_string.h>
+#include <omp.h>
 #include "raster.h"
 
 void print_raster(const char *path, const char *null_str, const char *fmt)
@@ -161,13 +162,21 @@ void copy_raster_metadata(struct raster_map *dest_map,
 struct raster_map *read_raster(const char *path, int type, int get_stats)
 {
     struct raster_map *rast_map;
-    GDALDatasetH dataset;
-    GDALRasterBandH band;
+    GDALDatasetH *datasets, dataset;
+    GDALRasterBandH *bands, band;
     GDALDataType gdt_type;
     size_t row_size;
     int row;
+    int error = 0;
 
-    if (!(dataset = GDALOpen(path, GA_ReadOnly)))
+#pragma omp parallel
+    {
+#pragma omp single
+        datasets = malloc(sizeof *datasets * omp_get_num_threads());
+        datasets[omp_get_thread_num()] = GDALOpen(path, GA_ReadOnly);
+    }
+
+    if (!(dataset = datasets[0]))
         return NULL;
 
     rast_map = calloc(1, sizeof *rast_map);
@@ -178,8 +187,15 @@ struct raster_map *read_raster(const char *path, int type, int get_stats)
     rast_map->dx = rast_map->geotransform[1];
     rast_map->dy = -rast_map->geotransform[5];
 
-    band = GDALGetRasterBand(dataset, 1);
+#pragma omp parallel
+    {
+#pragma omp single
+        bands = malloc(sizeof *bands * omp_get_num_threads());
+        bands[omp_get_thread_num()] =
+            GDALGetRasterBand(datasets[omp_get_thread_num()], 1);
+    }
 
+    band = bands[0];
     if (get_stats) {
         rast_map->has_stats = 1;
         GDALGetRasterStatistics(band, 0, 1, &rast_map->min, &rast_map->max,
@@ -233,15 +249,21 @@ struct raster_map *read_raster(const char *path, int type, int get_stats)
 
     rast_map->type = type;
     rast_map->cells.v = malloc(rast_map->nrows * row_size);
+
+#pragma omp parallel for schedule(dynamic)
     for (row = 0; row < rast_map->nrows; row++) {
         if (GDALRasterIO
-            (band, GF_Read, 0, row, rast_map->ncols, 1,
+            (bands[omp_get_thread_num()], GF_Read, 0, row, rast_map->ncols, 1,
              (char *)rast_map->cells.v + row * row_size, rast_map->ncols,
              1, gdt_type, 0, 0) != CE_None)
-            return NULL;
+            error = 1;
     }
 
-    GDALClose(dataset);
+#pragma omp parallel
+    GDALClose(datasets[omp_get_thread_num()]);
+
+    if (error)
+        return NULL;
 
     return rast_map;
 }
