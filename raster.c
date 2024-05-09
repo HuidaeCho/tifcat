@@ -131,7 +131,6 @@ void print_raster(const char *path, const char *null_str, const char *fmt)
         printf("\n");
     }
 
-
     free_raster(rast_map);
 }
 
