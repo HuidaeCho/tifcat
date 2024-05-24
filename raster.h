@@ -34,7 +34,7 @@ struct raster_map
 };
 
 /* raster.c */
-void print_raster(const char *, const char *, const char *);
+void print_raster(const char *, const char *, const char *, int);
 int is_null(struct raster_map *, int, int);
 struct raster_map *init_raster(int, int, int);
 void free_raster(struct raster_map *);

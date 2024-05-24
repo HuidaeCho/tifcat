@@ -4,7 +4,8 @@
 #include <omp.h>
 #include "raster.h"
 
-void print_raster(const char *path, const char *null_str, const char *fmt)
+void print_raster(const char *path, const char *null_str, const char *fmt,
+                  int use_dir)
 {
     struct raster_map *rast_map;
     int width;
@@ -13,6 +14,44 @@ void print_raster(const char *path, const char *null_str, const char *fmt)
 
     if (!(rast_map = read_raster(path, RASTER_MAP_TYPE_AUTO, 1)))
         return;
+
+    if (use_dir) {
+        char *arrows[] =
+            { "→", "↘", "↓", "↙", "←", "↖", "↑", "↗", "·" };
+
+        for (row = 0; row < rast_map->nrows; row++) {
+            for (col = 0; col < rast_map->ncols; col++) {
+                size_t idx = (size_t)row * rast_map->ncols + col;
+                char *sep = col < rast_map->ncols - 1 ? " " : "";
+                unsigned char dir;
+                int i;
+
+                switch (rast_map->type) {
+                case RASTER_MAP_TYPE_FLOAT64:
+                    dir = (unsigned char)rast_map->cells.float64[idx];
+                    break;
+                case RASTER_MAP_TYPE_FLOAT32:
+                    dir = (unsigned char)rast_map->cells.float32[idx];
+                    break;
+                case RASTER_MAP_TYPE_UINT32:
+                    dir = (unsigned char)rast_map->cells.uint32[idx];
+                    break;
+                case RASTER_MAP_TYPE_INT32:
+                    dir = (unsigned char)rast_map->cells.int32[idx];
+                    break;
+                default:
+                    dir = rast_map->cells.byte[idx];
+                    break;
+                }
+
+                for (i = 0; i < 8 && dir != 1 << i; i++) ;
+
+                printf("%s%s", arrows[i], sep);
+            }
+            printf("\n");
+        }
+        return;
+    }
 
     switch (rast_map->type) {
     case RASTER_MAP_TYPE_FLOAT64:
