@@ -60,12 +60,16 @@ void print_raster(const char *path, const char *null_str, const char *fmt,
         return;
     }
 
+    width = rast_map->max > 0 ? (int)log10(rast_map->max) + 1 : 1;
+
     switch (rast_map->type) {
     case RASTER_MAP_TYPE_FLOAT64:
         type_format = "lf";
+	width += 4;
         break;
     case RASTER_MAP_TYPE_FLOAT32:
         type_format = "f";
+	width += 4;
         break;
     case RASTER_MAP_TYPE_UINT32:
         type_format = "u";
@@ -74,8 +78,6 @@ void print_raster(const char *path, const char *null_str, const char *fmt,
         type_format = "d";
         break;
     }
-
-    width = rast_map->max > 0 ? (int)log10(rast_map->max) + 1 : 1;
 
     if (null_str) {
         int w = strlen(null_str);
@@ -139,7 +141,7 @@ void print_raster(const char *path, const char *null_str, const char *fmt,
         switch (rast_map->type) {
         case RASTER_MAP_TYPE_FLOAT64:
         case RASTER_MAP_TYPE_FLOAT32:
-            sprintf(format, "%%%d.%d%s%%s", width + 4, 3, type_format);
+            sprintf(format, "%%%d.%d%s%%s", width, 3, type_format);
             break;
         default:
             sprintf(format, "%%%d%s%%s", width, type_format);
