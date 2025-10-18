@@ -21,32 +21,39 @@ void print_raster(const char *path, const char *null_str, const char *fmt,
 
         for (row = 0; row < rast_map->nrows; row++) {
             for (col = 0; col < rast_map->ncols; col++) {
-                size_t idx = (size_t)row * rast_map->ncols + col;
+                char *arrow;
                 char *sep = col < rast_map->ncols - 1 ? " " : "";
-                unsigned char dir;
-                int i;
 
-                switch (rast_map->type) {
-                case RASTER_MAP_TYPE_FLOAT64:
-                    dir = (unsigned char)rast_map->cells.float64[idx];
-                    break;
-                case RASTER_MAP_TYPE_FLOAT32:
-                    dir = (unsigned char)rast_map->cells.float32[idx];
-                    break;
-                case RASTER_MAP_TYPE_UINT32:
-                    dir = (unsigned char)rast_map->cells.uint32[idx];
-                    break;
-                case RASTER_MAP_TYPE_INT32:
-                    dir = (unsigned char)rast_map->cells.int32[idx];
-                    break;
-                default:
-                    dir = rast_map->cells.byte[idx];
-                    break;
+                if (is_null(rast_map, row, col))
+                    arrow = " ";
+                else {
+                    size_t idx = (size_t)row * rast_map->ncols + col;
+                    unsigned char dir;
+                    int i;
+
+                    switch (rast_map->type) {
+                    case RASTER_MAP_TYPE_FLOAT64:
+                        dir = (unsigned char)rast_map->cells.float64[idx];
+                        break;
+                    case RASTER_MAP_TYPE_FLOAT32:
+                        dir = (unsigned char)rast_map->cells.float32[idx];
+                        break;
+                    case RASTER_MAP_TYPE_UINT32:
+                        dir = (unsigned char)rast_map->cells.uint32[idx];
+                        break;
+                    case RASTER_MAP_TYPE_INT32:
+                        dir = (unsigned char)rast_map->cells.int32[idx];
+                        break;
+                    default:
+                        dir = rast_map->cells.byte[idx];
+                        break;
+                    }
+
+                    for (i = 0; i < 8 && dir != 1 << i; i++) ;
+
+                    arrow = arrows[i];
                 }
-
-                for (i = 0; i < 8 && dir != 1 << i; i++) ;
-
-                printf("%s%s", arrows[i], sep);
+                printf("%s%s", arrow, sep);
             }
             printf("\n");
         }
